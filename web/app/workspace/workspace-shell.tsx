@@ -170,6 +170,50 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
     [isConnected, bucketName, credentials, region, setPrefix, refresh]
   );
 
+  const handleDeleteFolder = useCallback(
+    async (folderPrefix: string) => {
+      if (!isConnected || !bucketName || !credentials) return;
+      const confirmed = window.confirm(
+        "Delete this folder and all files inside it? This cannot be undone."
+      );
+      if (!confirmed) return;
+      setFolderError(null);
+      setCreatingFolder(true);
+      try {
+        const res = await fetch("/api/s3/delete-folder", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({
+            bucket: bucketName,
+            region: region || undefined,
+            accessKeyId: credentials.accessKeyId,
+            secretAccessKey: credentials.secretAccessKey,
+            prefix: folderPrefix,
+          }),
+        });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || "Failed to delete folder");
+
+        // If user was inside this folder, bump them up to parent/root
+        setPrefix((prev) =>
+          prev && prev.startsWith(folderPrefix)
+            ? folderPrefix.includes("/")
+              ? folderPrefix.replace(/[^/]+\/?$/, "")
+              : ""
+            : prev
+        );
+        refresh();
+      } catch (err) {
+        setFolderError(
+          err instanceof Error ? err.message : "Failed to delete folder"
+        );
+      } finally {
+        setCreatingFolder(false);
+      }
+    },
+    [isConnected, bucketName, credentials, region, setPrefix, refresh]
+  );
+
   useEffect(() => {
     const onKey = (e: KeyboardEvent) => {
       if ((e.metaKey || e.ctrlKey) && e.key === "k") {
@@ -538,7 +582,7 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
                     <button
                       type="button"
                       onClick={() => setPrefix(f.prefix)}
-                      className="flex flex-1 items-center gap-2 text-left text-sm"
+                      className="flex min-w-0 flex-1 items-center gap-2 text-left text-sm"
                     >
                       <span
                         className={cn(
@@ -562,6 +606,19 @@ export function WorkspaceShell({ children }: { children: React.ReactNode }) {
                       title="Rename folder"
                     >
                       ✏️
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => handleDeleteFolder(f.prefix)}
+                      className={cn(
+                        "ml-1 shrink-0 rounded px-1.5 py-0.5 text-[10px] font-medium",
+                        theme === "light"
+                          ? "text-rose-500 hover:bg-rose-100 hover:text-rose-700"
+                          : "text-rose-400 hover:bg-rose-900/40 hover:text-rose-300"
+                      )}
+                      title="Delete folder"
+                    >
+                      🗑️
                     </button>
                   </div>
                 ))}

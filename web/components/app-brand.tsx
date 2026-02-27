@@ -1,4 +1,5 @@
 import { cn } from "@/lib/utils";
+import { useTheme } from "@/app/theme-provider";
 
 type AppBrandProps = {
   variant?: "full" | "compact";
@@ -6,6 +7,8 @@ type AppBrandProps = {
 
 export function AppBrand({ variant = "full" }: AppBrandProps) {
   const showSubtitle = variant === "full";
+  const { theme } = useTheme();
+  const isLight = theme === "light";
 
   return (
     <div className="flex items-center gap-2 sm:gap-3">
@@ -49,11 +52,21 @@ export function AppBrand({ variant = "full" }: AppBrandProps) {
         </svg>
       </div>
       <div className="flex flex-col">
-        <span className="text-base font-semibold tracking-tight text-slate-50 sm:text-lg">
+        <span
+          className={cn(
+            "text-base font-semibold tracking-tight sm:text-lg",
+            isLight ? "text-slate-900" : "text-slate-50"
+          )}
+        >
           AWS S3 Studio
         </span>
         {showSubtitle && (
-          <span className={cn("text-[11px] text-slate-400")}>
+          <span
+            className={cn(
+              "text-[11px]",
+              isLight ? "text-slate-500" : "text-slate-400"
+            )}
+          >
             Your studio for S3
           </span>
         )}

@@ -1,6 +1,10 @@
 import { generateTextWithJson } from "@/lib/gemini";
 import { NextRequest, NextResponse } from "next/server";
-import { ListObjectsV2Command, S3Client } from "@aws-sdk/client-s3";
+import {
+  ListObjectsV2Command,
+  type ListObjectsV2CommandOutput,
+  S3Client,
+} from "@aws-sdk/client-s3";
 
 type FileEntry = { key: string; name: string; size?: number; lastModified?: string | null };
 type FolderEntry = { name: string; prefix: string };
@@ -41,7 +45,7 @@ async function listAllFilesInBucket(params: {
   let continuationToken: string | undefined = undefined;
 
   do {
-    const res = await client.send(
+    const res: ListObjectsV2CommandOutput = await client.send(
       new ListObjectsV2Command({
         Bucket: bucket,
         ContinuationToken: continuationToken,

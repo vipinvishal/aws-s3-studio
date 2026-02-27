@@ -3,6 +3,7 @@ import {
   DeleteObjectsCommand,
   GetBucketLocationCommand,
   ListObjectsV2Command,
+  type ListObjectsV2CommandOutput,
   S3Client,
 } from "@aws-sdk/client-s3";
 import { NextRequest, NextResponse } from "next/server";
@@ -103,7 +104,7 @@ export async function POST(request: NextRequest) {
               ContinuationToken: continuationToken,
             })
           )
-        )) as Awaited<ReturnType<S3Client["send"]>>;
+        )) as ListObjectsV2CommandOutput;
         listRes.Contents?.forEach((o) => {
           if (o.Key) {
             const suffix = o.Key.slice(oldK.length);

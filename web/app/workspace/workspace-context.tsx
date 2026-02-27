@@ -47,7 +47,7 @@ type WorkspaceState = {
   setSearchQuery: (q: string) => void;
   viewMode: ViewMode;
   setViewMode: (m: ViewMode) => void;
-  setPrefix: (prefix: string) => void;
+  setPrefix: (prefix: string | ((prev: string) => string)) => void;
   goToRoot: () => void;
   goToSegment: (index: number) => void;
   refresh: () => void;
@@ -147,7 +147,11 @@ export function WorkspaceProvider({ children }: { children: React.ReactNode }) {
     fetchList();
   }, [fetchList]);
 
-  const setPrefix = useCallback((p: string) => setPrefixState(p), []);
+  const setPrefix = useCallback(
+    (p: string | ((prev: string) => string)) =>
+      setPrefixState(typeof p === "function" ? (p as (prev: string) => string) : p),
+    []
+  );
   const setSearchQuery = useCallback((q: string) => setSearchQueryState(q), []);
   const setViewMode = useCallback((m: ViewMode) => setViewModeState(m), []);
   const setAiSearchResult = useCallback((answer: string, match: string[]) => {

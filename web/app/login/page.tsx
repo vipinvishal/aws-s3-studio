@@ -1,19 +1,14 @@
 "use client";
 
 import { useState } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/client";
 import { buttonVariants } from "@/components/ui/button";
 import { cn } from "@/lib/utils";
 
-export const dynamic = "force-dynamic";
-
 export default function LoginPage() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-  const router = useRouter();
-  const searchParams = useSearchParams();
 
   const handleLoginWithGoogle = async () => {
     setError(null);
@@ -22,7 +17,7 @@ export default function LoginPage() {
       const supabase = createClient();
       const origin =
         typeof window !== "undefined" ? window.location.origin : "";
-      const redirectPath = searchParams.get("redirect") ?? "/connect";
+      const redirectPath = "/connect";
 
       const { error: signInError } = await supabase.auth.signInWithOAuth({
         provider: "google",
